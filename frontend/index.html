@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Threads of Tradition - Empowering Indian handloom artisans with AI-powered tools. Discover authentic handmade products.">
+    <title>Threads of Tradition | Empowering Indian Artisans</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .features {
+            padding: var(--space-16) 0;
+            background: var(--bg-secondary);
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--space-8);
+            margin-top: var(--space-8);
+        }
+        
+        .feature-card {
+            background: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            box-shadow: var(--shadow-md);
+            transition: all var(--transition-base);
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-xl);
+        }
+        
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-4);
+            background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+        
+        .how-it-works {
+            padding: var(--space-16) 0;
+        }
+        
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: var(--space-8);
+            margin-top: var(--space-8);
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 220px;
+            max-width: 280px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-600) 100%);
+            color: white;
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-display);
+            font-size: var(--font-size-2xl);
+            font-weight: 700;
+            margin: 0 auto var(--space-4);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .cta-section {
+            background: linear-gradient(135deg, var(--primary-700) 0%, var(--accent-maroon) 100%);
+            color: white;
+            padding: var(--space-16) 0;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            color: white;
+        }
+        
+        .portal-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--space-6);
+            margin-top: var(--space-8);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .portal-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-xl);
+            padding: var(--space-8);
+            text-align: center;
+            transition: all var(--transition-base);
+        }
+        
+        .portal-card:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-4px);
+        }
+        
+        .portal-card h3 {
+            color: white;
+        }
+        
+        .portal-card p {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: var(--space-6);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="index.html" class="navbar-brand">
+                <span>🧵</span>
+                <span>Threads of Tradition</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="shop/index.html">Shop</a></li>
+                <li><a href="artisan/index.html">Artisan Portal</a></li>
+                <li><a href="admin/index.html">Admin</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="shop/index.html" class="btn btn-gold">Browse Products</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-content animate-fadeIn">
+            <h1>Preserve Tradition,<br>Empower Artisans</h1>
+            <p>Discover authentic handloom treasures crafted by skilled Indian artisans.<br>Powered by AI to help artisans price and market their creations.</p>
+            <div class="hero-actions">
+                <a href="shop/index.html" class="btn btn-gold btn-lg">Explore Products</a>
+                <a href="artisan/register.html" class="btn btn-secondary btn-lg" style="background: white;">Join as Artisan</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <h2 class="text-center">Why Choose Threads of Tradition?</h2>
+            <p class="text-center text-muted">Bridging tradition with technology to empower rural artisans</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">👩‍🎨</div>
+                    <h4>Verified Artisans</h4>
+                    <p>Every artisan on our platform is verified, ensuring you get authentic handmade products directly from skilled craftspeople.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h4>AI-Powered Assistance</h4>
+                    <p>Our AI helps artisans create compelling product descriptions and fair pricing, removing the digital marketing barrier.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🏆</div>
+                    <h4>Fair Trade Certified</h4>
+                    <p>Each product comes with a unique certificate ID, ensuring transparency and fair compensation for artisans.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">🌿</div>
+                    <h4>Sustainable Fashion</h4>
+                    <p>Handloom products are eco-friendly and sustainable, supporting both artisans and the environment.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container">
+            <h2 class="text-center">How It Works</h2>
+            <p class="text-center text-muted">Simple steps to connect artisans with customers</p>
+            
+            <div class="steps">
+                <div class="step animate-slideUp">
+                    <div class="step-number">1</div>
+                    <h4>Artisan Registers</h4>
+                    <p class="text-muted">Artisans sign up and get verified on our platform</p>
+                </div>
+                
+                <div class="step animate-slideUp" style="animation-delay: 0.1s;">
+                    <div class="step-number">2</div>
+                    <h4>Upload Products</h4>
+                    <p class="text-muted">Upload images and details of handmade creations</p>
+                </div>
+                
+                <div class="step animate-slideUp" style="animation-delay: 0.2s;">
+                    <div class="step-number">3</div>
+                    <h4>AI Enhancement</h4>
+                    <p class="text-muted">AI generates captions and price recommendations</p>
+                </div>
+                
+                <div class="step animate-slideUp" style="animation-delay: 0.3s;">
+                    <div class="step-number">4</div>
+                    <h4>Reach Customers</h4>
+                    <p class="text-muted">Products appear on the shopping portal instantly</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Get Started?</h2>
+            <p>Choose your path and join the Threads of Tradition community</p>
+            
+            <div class="portal-cards">
+                <div class="portal-card">
+                    <h3>🛍️ For Customers</h3>
+                    <p>Browse authentic handmade products from verified Indian artisans</p>
+                    <a href="shop/index.html" class="btn btn-gold btn-block">Browse Shop</a>
+                </div>
+                
+                <div class="portal-card">
+                    <h3>👩‍🎨 For Artisans</h3>
+                    <p>Register to showcase your handmade creations to a global audience</p>
+                    <a href="artisan/register.html" class="btn btn-primary btn-block">Join as Artisan</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div>
+                    <h4>🧵 Threads of Tradition</h4>
+                    <p>Empowering Indian handloom artisans through technology and fair trade practices.</p>
+                </div>
+                <div>
+                    <h4>Quick Links</h4>
+                    <a href="shop/index.html">Shop Products</a>
+                    <a href="artisan/index.html">Artisan Portal</a>
+                    <a href="admin/index.html">Admin Login</a>
+                </div>
+                <div>
+                    <h4>Contact</h4>
+                    <a href="mailto:info@threadsoftradition.in">info@threadsoftradition.in</a>
+                    <p>Made with ❤️ in India</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2024 Threads of Tradition. All rights reserved. | A demonstration prototype</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

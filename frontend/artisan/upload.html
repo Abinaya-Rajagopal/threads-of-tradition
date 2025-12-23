@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Upload your handmade product on Threads of Tradition">
+    <title>Upload Product | Threads of Tradition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .upload-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8) var(--space-4);
+        }
+
+        @media (max-width: 900px) {
+            .upload-layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .upload-form-section {
+            background: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .preview-section {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .product-preview-card {
+            background: white;
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            overflow: hidden;
+        }
+
+        .preview-image-placeholder {
+            width: 100%;
+            height: 300px;
+            background: linear-gradient(135deg, var(--primary-100) 0%, var(--primary-200) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-500);
+            font-size: var(--font-size-lg);
+        }
+
+        .preview-content {
+            padding: var(--space-6);
+        }
+
+        .preview-skeleton {
+            background: var(--gray-200);
+            border-radius: var(--radius-sm);
+            height: 1em;
+            margin-bottom: var(--space-2);
+        }
+
+        .ai-generating {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            color: var(--primary-600);
+            font-size: var(--font-size-sm);
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: var(--space-4);
+            margin-bottom: var(--space-8);
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: var(--space-3);
+            border-bottom: 3px solid var(--gray-200);
+            color: var(--gray-400);
+            font-weight: 500;
+        }
+
+        .step.active {
+            border-color: var(--primary-500);
+            color: var(--primary-600);
+        }
+
+        .step.completed {
+            border-color: var(--success);
+            color: var(--success);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="../index.html" class="navbar-brand">
+                <span>🧵</span>
+                <span>Threads of Tradition</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="../shop/index.html">Shop</a></li>
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="upload.html" class="active">Upload Product</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button class="btn btn-ghost" onclick="logout()" style="color: white;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="upload-layout">
+        <!-- Upload Form -->
+        <div class="upload-form-section animate-fadeIn">
+            <h2>Upload Your Creation</h2>
+            <p class="text-muted mb-6">Share your handmade masterpiece with the world</p>
+
+            <div class="step-indicator">
+                <div class="step active" id="step-1">1. Details</div>
+                <div class="step" id="step-2">2. AI Magic</div>
+                <div class="step" id="step-3">3. Preview & Submit</div>
+            </div>
+
+            <div id="alert-container"></div>
+
+            <form id="upload-form">
+                <!-- Step 1: Basic Details -->
+                <div id="details-section">
+                    <div class="form-group">
+                        <label class="form-label required" for="image">Product Image</label>
+                        <div class="file-upload" id="image-upload-area">
+                            <input type="file" id="image" name="image" accept="image/*" required>
+                            <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="file-upload-text">Click to upload product image</span>
+                            <span class="file-upload-hint">High quality photos recommended</span>
+                        </div>
+                        <div class="image-preview hidden" id="image-preview-container">
+                            <img id="image-preview" src="" alt="Preview">
+                            <button type="button" class="remove-btn" onclick="removeImage()">✕</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="material">Material Used</label>
+                        <select id="material" name="material" class="form-control" required>
+                            <option value="">Select material...</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label required" for="time_spent">Time Spent (hours)</label>
+                        <input type="number" id="time_spent" name="time_spent" class="form-control"
+                            placeholder="e.g., 24" min="1" step="0.5" required>
+                        <span class="form-hint">How many hours did it take to create this product?</span>
+                    </div>
+
+                    <button type="button" class="btn btn-primary btn-block btn-lg" onclick="generateAIContent()">
+                        ✨ Generate AI Caption & Price
+                    </button>
+                </div>
+
+                <!-- Step 2: AI Generated Content -->
+                <div id="ai-section" class="hidden">
+                    <div class="ai-preview">
+                        <div class="ai-preview-header">
+                            <span class="ai-badge">🤖 AI Generated</span>
+                            Caption
+                        </div>
+                        <div class="ai-preview-content">
+                            <p id="generated-caption">Generating...</p>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label" for="caption">Edit Caption (Optional)</label>
+                        <textarea id="caption" name="caption" class="form-control" rows="4"></textarea>
+                        <span class="form-hint">You can modify the AI-generated caption if needed</span>
+                    </div>
+
+                    <div class="ai-preview">
+                        <div class="ai-preview-header">
+                            <span class="ai-badge">💰 AI Recommended</span>
+                            Price Range
+                        </div>
+                        <div class="ai-preview-content">
+                            <p id="generated-price"
+                                style="font-size: var(--font-size-2xl); font-weight: 700; color: var(--primary-700);">
+                                Calculating...
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" for="price_min">Min Price (₹)</label>
+                            <input type="number" id="price_min" name="price_min" class="form-control" min="0">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label class="form-label" for="price_max">Max Price (₹)</label>
+                            <input type="number" id="price_max" name="price_max" class="form-control" min="0">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-4">
+                        <button type="button" class="btn btn-secondary btn-block" onclick="goBack()">
+                            ← Back
+                        </button>
+                        <button type="submit" class="btn btn-gold btn-block btn-lg" id="submit-btn">
+                            🚀 Publish Product
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Live Preview -->
+        <div class="preview-section">
+            <h3 class="mb-4">Live Preview</h3>
+            <div class="product-preview-card">
+                <div class="preview-image-placeholder" id="preview-image-area">
+                    <span>📷 Upload an image to preview</span>
+                </div>
+                <div class="preview-content">
+                    <div class="flex justify-between items-center mb-4">
+                        <span class="badge badge-info" id="preview-material">Material</span>
+                        <span class="certificate-id" id="preview-certificate">TOT-XXXXXXXX</span>
+                    </div>
+                    <p class="card-text" id="preview-caption" style="min-height: 60px;">
+                        Your AI-generated caption will appear here...
+                    </p>
+                    <div class="price-tag" id="preview-price">₹0 - ₹0</div>
+                    <p class="text-muted text-sm mt-2" id="preview-time">⏱️ 0 hours of craftsmanship</p>
+                    <div class="artisan-info mt-4">
+                        <span>👩‍🎨</span>
+                        <span id="preview-artisan">Your Name • Your Location</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!Auth.requireArtisan()) {
+            // Redirect happens in requireArtisan
+        }
+
+        let generatedCaption = '';
+        let generatedPriceMin = 0;
+        let generatedPriceMax = 0;
+
+        // Load materials
+        async function loadMaterials() {
+            try {
+                const response = await API.Product.getMaterials();
+                const select = document.getElementById('material');
+                response.materials.forEach(material => {
+                    const option = document.createElement('option');
+                    option.value = material;
+                    option.textContent = material.charAt(0).toUpperCase() + material.slice(1);
+                    select.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading materials:', error);
+            }
+        }
+
+        // Load artisan info for preview
+        async function loadArtisanInfo() {
+            try {
+                const response = await API.Artisan.getProfile();
+                document.getElementById('preview-artisan').textContent =
+                    `${response.artisan.name} • ${response.artisan.location}`;
+            } catch (error) {
+                console.error('Error loading artisan info:', error);
+            }
+        }
+
+        // Image preview
+        document.getElementById('image').addEventListener('change', function (e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById('image-preview').src = e.target.result;
+                    document.getElementById('image-preview-container').classList.remove('hidden');
+                    document.getElementById('image-upload-area').classList.add('hidden');
+                    document.getElementById('preview-image-area').innerHTML =
+                        `<img src="${e.target.result}" style="width: 100%; height: 300px; object-fit: cover;">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function removeImage() {
+            document.getElementById('image').value = '';
+            document.getElementById('image-preview-container').classList.add('hidden');
+            document.getElementById('image-upload-area').classList.remove('hidden');
+            document.getElementById('preview-image-area').innerHTML =
+                '<span>📷 Upload an image to preview</span>';
+        }
+
+        // Live preview updates
+        document.getElementById('material').addEventListener('change', function () {
+            document.getElementById('preview-material').textContent = this.value || 'Material';
+        });
+
+        document.getElementById('time_spent').addEventListener('input', function () {
+            document.getElementById('preview-time').textContent = `⏱️ ${this.value || 0} hours of craftsmanship`;
+        });
+
+        // Generate AI content
+        async function generateAIContent() {
+            const material = document.getElementById('material').value;
+            const timeSpent = document.getElementById('time_spent').value;
+            const image = document.getElementById('image').files[0];
+
+            if (!material || !timeSpent || !image) {
+                showAlert('Please fill in all required fields and upload an image', 'warning');
+                return;
+            }
+
+            // Update steps
+            document.getElementById('step-1').classList.remove('active');
+            document.getElementById('step-1').classList.add('completed');
+            document.getElementById('step-2').classList.add('active');
+
+            // Show AI section
+            document.getElementById('details-section').classList.add('hidden');
+            document.getElementById('ai-section').classList.remove('hidden');
+
+            try {
+                // Generate caption
+                const captionResponse = await API.Product.generateCaption({
+                    material: material,
+                    time_spent: parseFloat(timeSpent)
+                });
+
+                generatedCaption = captionResponse.caption;
+                document.getElementById('generated-caption').textContent = generatedCaption;
+                document.getElementById('caption').value = generatedCaption;
+                document.getElementById('preview-caption').textContent = generatedCaption;
+
+                // Generate price
+                const priceResponse = await API.Product.recommendPrice({
+                    material: material,
+                    time_spent: parseFloat(timeSpent)
+                });
+
+                generatedPriceMin = priceResponse.price_min;
+                generatedPriceMax = priceResponse.price_max;
+
+                document.getElementById('generated-price').textContent = priceResponse.price_display;
+                document.getElementById('price_min').value = generatedPriceMin;
+                document.getElementById('price_max').value = generatedPriceMax;
+                document.getElementById('preview-price').textContent = priceResponse.price_display;
+
+                // Update step indicator
+                document.getElementById('step-2').classList.remove('active');
+                document.getElementById('step-2').classList.add('completed');
+                document.getElementById('step-3').classList.add('active');
+
+                // Generate preview certificate
+                document.getElementById('preview-certificate').textContent =
+                    `TOT-${Math.random().toString(36).substr(2, 8).toUpperCase()}`;
+
+            } catch (error) {
+                showAlert('Error generating AI content: ' + error.message, 'error');
+                goBack();
+            }
+        }
+
+        function goBack() {
+            document.getElementById('details-section').classList.remove('hidden');
+            document.getElementById('ai-section').classList.add('hidden');
+
+            document.getElementById('step-1').classList.add('active');
+            document.getElementById('step-1').classList.remove('completed');
+            document.getElementById('step-2').classList.remove('active');
+            document.getElementById('step-2').classList.remove('completed');
+            document.getElementById('step-3').classList.remove('active');
+        }
+
+        // Caption edit updates preview
+        document.getElementById('caption').addEventListener('input', function () {
+            document.getElementById('preview-caption').textContent = this.value || 'Your caption...';
+        });
+
+        // Price edit updates preview
+        function updatePreviewPrice() {
+            const min = document.getElementById('price_min').value || 0;
+            const max = document.getElementById('price_max').value || 0;
+            document.getElementById('preview-price').textContent =
+                `₹${parseInt(min).toLocaleString()} - ₹${parseInt(max).toLocaleString()}`;
+        }
+        document.getElementById('price_min').addEventListener('input', updatePreviewPrice);
+        document.getElementById('price_max').addEventListener('input', updatePreviewPrice);
+
+        // Form submission
+        document.getElementById('upload-form').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            const submitBtn = document.getElementById('submit-btn');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner" style="width: 20px; height: 20px;"></span> Publishing...';
+
+            try {
+                const formData = new FormData();
+                formData.append('image', document.getElementById('image').files[0]);
+                formData.append('material', document.getElementById('material').value);
+                formData.append('time_spent', document.getElementById('time_spent').value);
+                formData.append('caption', document.getElementById('caption').value);
+                formData.append('price_min', document.getElementById('price_min').value);
+                formData.append('price_max', document.getElementById('price_max').value);
+
+                const response = await API.Product.upload(formData);
+
+                showAlert('Product published successfully! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                showAlert('Error uploading product: ' + error.message, 'error');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '🚀 Publish Product';
+            }
+        });
+
+        function showAlert(message, type = 'error') {
+            document.getElementById('alert-container').innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        function logout() {
+            Auth.logout();
+            window.location.href = 'login.html';
+        }
+
+        // Initialize
+        loadMaterials();
+        loadArtisanInfo();
+    </script>
+</body>
+
+</html>

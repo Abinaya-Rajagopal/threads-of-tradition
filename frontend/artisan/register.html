@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Register as an artisan on Threads of Tradition">
+    <title>Artisan Registration | Threads of Tradition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+
+<body class="auth-page">
+    <div class="auth-card animate-slideUp">
+        <div class="auth-header">
+            <a href="../index.html" style="color: white; text-decoration: none;">
+                <h1>🧵 Threads of Tradition</h1>
+            </a>
+            <p>Join our community of skilled artisans</p>
+        </div>
+
+        <div class="auth-body">
+            <div id="alert-container"></div>
+
+            <form id="register-form">
+                <div class="form-group">
+                    <label class="form-label required" for="name">Full Name</label>
+                    <input type="text" id="name" name="name" class="form-control" placeholder="Enter your full name"
+                        required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="location">Location</label>
+                    <input type="text" id="location" name="location" class="form-control"
+                        placeholder="City, State (e.g., Varanasi, UP)" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="email">Email Address</label>
+                    <input type="email" id="email" name="email" class="form-control"
+                        placeholder="your.email@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label required" for="password">Password</label>
+                    <input type="password" id="password" name="password" class="form-control"
+                        placeholder="Create a strong password" required minlength="6">
+                    <span class="form-hint">Minimum 6 characters</span>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="certificate">Artisan Certificate (Optional)</label>
+                    <div class="file-upload">
+                        <input type="file" id="certificate" name="certificate" accept="image/*,.pdf">
+                        <svg class="file-upload-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                            stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <span class="file-upload-text">Click to upload or drag and drop</span>
+                        <span class="file-upload-hint">PNG, JPG, PDF up to 5MB</span>
+                    </div>
+                    <span class="form-hint">Upload any artisan ID or certificate for verification</span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-block btn-lg" id="submit-btn">
+                    <span>Create Account</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="auth-footer">
+            <p>Already have an account? <a href="login.html">Login here</a></p>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        const form = document.getElementById('register-form');
+        const submitBtn = document.getElementById('submit-btn');
+        const alertContainer = document.getElementById('alert-container');
+
+        function showAlert(message, type = 'error') {
+            alertContainer.innerHTML = `
+                <div class="alert alert-${type}">
+                    ${message}
+                </div>
+            `;
+        }
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            // Show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<span class="spinner" style="width: 20px; height: 20px;"></span> Creating Account...';
+            alertContainer.innerHTML = '';
+
+            try {
+                // Create form data
+                const formData = new FormData(form);
+
+                // Make API request
+                const response = await API.Artisan.register(formData);
+
+                // Store auth data
+                Auth.setAuth(response.token, response.artisan, 'artisan');
+
+                // Show success and redirect
+                showAlert('Account created successfully! Redirecting...', 'success');
+
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1500);
+
+            } catch (error) {
+                showAlert(error.message);
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<span>Create Account</span>';
+            }
+        });
+
+        // File upload visual feedback
+        const fileInput = document.getElementById('certificate');
+        const fileUpload = fileInput.closest('.file-upload');
+
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                fileUpload.querySelector('.file-upload-text').textContent = e.target.files[0].name;
+            }
+        });
+
+        // Redirect if already logged in
+        if (Auth.isArtisan()) {
+            window.location.href = 'dashboard.html';
+        }
+    </script>
+</body>
+
+</html>

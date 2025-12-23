@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin Dashboard - Manage Artisan Verification">
+    <title>Admin Dashboard | Threads of Tradition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .admin-navbar {
+            background: linear-gradient(135deg, var(--gray-800) 0%, var(--gray-900) 100%);
+        }
+
+        .admin-layout {
+            min-height: calc(100vh - 72px);
+            background: var(--gray-100);
+        }
+
+        .admin-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: var(--space-8) var(--space-4);
+        }
+
+        .artisan-table {
+            width: 100%;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            overflow: hidden;
+        }
+
+        .artisan-table thead {
+            background: var(--gray-50);
+        }
+
+        .artisan-table th,
+        .artisan-table td {
+            padding: var(--space-4) var(--space-5);
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .artisan-table th {
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: var(--font-size-sm);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .artisan-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: var(--space-2);
+        }
+
+        .tab-nav {
+            display: flex;
+            gap: var(--space-1);
+            background: white;
+            padding: var(--space-2);
+            border-radius: var(--radius-lg);
+            margin-bottom: var(--space-6);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tab-btn {
+            padding: var(--space-3) var(--space-6);
+            border: none;
+            background: transparent;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-weight: 500;
+            color: var(--gray-600);
+            transition: all var(--transition-fast);
+        }
+
+        .tab-btn:hover {
+            background: var(--gray-100);
+        }
+
+        .tab-btn.active {
+            background: var(--primary-500);
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar admin-navbar">
+        <div class="container navbar-content">
+            <a href="../index.html" class="navbar-brand">
+                <span>🛠️</span>
+                <span>Admin Dashboard</span>
+            </a>
+            <div class="navbar-actions">
+                <button class="btn btn-ghost" onclick="logout()" style="color: white;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="admin-layout">
+        <div class="admin-content">
+            <!-- Stats -->
+            <div class="stats-grid animate-fadeIn">
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-total">-</div>
+                    <div class="stat-label">Total Artisans</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-verified" style="color: var(--success);">-</div>
+                    <div class="stat-label">Verified</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-pending" style="color: var(--warning);">-</div>
+                    <div class="stat-label">Pending Review</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="stat-products" style="color: var(--info);">-</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation -->
+            <div class="tab-nav">
+                <button class="tab-btn active" onclick="filterArtisans('all', this)">All Artisans</button>
+                <button class="tab-btn" onclick="filterArtisans('pending', this)">Pending</button>
+                <button class="tab-btn" onclick="filterArtisans('verified', this)">Verified</button>
+                <button class="tab-btn" onclick="filterArtisans('rejected', this)">Rejected</button>
+            </div>
+
+            <!-- Artisans Table -->
+            <div id="artisans-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-4">Loading artisans...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!Auth.requireAdmin()) {
+            // Redirect happens in requireAdmin
+        }
+
+        let currentFilter = 'all';
+
+        async function loadStats() {
+            try {
+                const response = await API.Admin.getStats();
+                const stats = response.stats;
+
+                document.getElementById('stat-total').textContent = stats.total_artisans;
+                document.getElementById('stat-verified').textContent = stats.verified_artisans;
+                document.getElementById('stat-pending').textContent = stats.pending_artisans;
+                document.getElementById('stat-products').textContent = stats.total_products;
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        async function loadArtisans(status = null) {
+            const container = document.getElementById('artisans-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-4">Loading artisans...</p>
+                </div>
+            `;
+
+            try {
+                const response = await API.Admin.listArtisans(status === 'all' ? null : status);
+                const artisans = response.artisans;
+
+                if (artisans.length === 0) {
+                    container.innerHTML = `
+                        <div class="alert alert-info">
+                            No artisans found${status ? ` with status: ${status}` : ''}.
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="artisan-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Location</th>
+                                <th>Email</th>
+                                <th>Products</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${artisans.map(artisan => `
+                                <tr>
+                                    <td><strong>${artisan.name}</strong></td>
+                                    <td>${artisan.location}</td>
+                                    <td>${artisan.email}</td>
+                                    <td>${artisan.product_count}</td>
+                                    <td>${getStatusBadge(artisan.verification_status)}</td>
+                                    <td>${formatDate(artisan.created_at)}</td>
+                                    <td>
+                                        <div class="action-buttons">
+                                            ${getActionButtons(artisan)}
+                                        </div>
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        Error loading artisans: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function getStatusBadge(status) {
+            const badges = {
+                'pending': '<span class="badge badge-warning">⏳ Pending</span>',
+                'verified': '<span class="badge badge-success">✓ Verified</span>',
+                'rejected': '<span class="badge badge-error">✕ Rejected</span>'
+            };
+            return badges[status] || badges['pending'];
+        }
+
+        function getActionButtons(artisan) {
+            if (artisan.verification_status === 'pending') {
+                return `
+                    <button class="btn btn-sm btn-primary" onclick="verifyArtisan(${artisan.id}, 'verify')">
+                        ✓ Verify
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="verifyArtisan(${artisan.id}, 'reject')">
+                        ✕ Reject
+                    </button>
+                `;
+            } else if (artisan.verification_status === 'verified') {
+                return `
+                    <button class="btn btn-sm btn-ghost" onclick="verifyArtisan(${artisan.id}, 'reject')">
+                        Revoke
+                    </button>
+                `;
+            } else {
+                return `
+                    <button class="btn btn-sm btn-primary" onclick="verifyArtisan(${artisan.id}, 'verify')">
+                        ✓ Verify
+                    </button>
+                `;
+            }
+        }
+
+        function formatDate(dateString) {
+            if (!dateString) return '-';
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+
+        async function verifyArtisan(artisanId, action) {
+            const confirmMessage = action === 'verify'
+                ? 'Verify this artisan? They will get a verified badge.'
+                : 'Reject/revoke this artisan? Their verified badge will be removed.';
+
+            if (!confirm(confirmMessage)) return;
+
+            try {
+                await API.Admin.verifyArtisan(artisanId, action);
+                loadArtisans(currentFilter === 'all' ? null : currentFilter);
+                loadStats();
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function filterArtisans(status, button) {
+            currentFilter = status;
+
+            // Update active tab
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            button.classList.add('active');
+
+            loadArtisans(status === 'all' ? null : status);
+        }
+
+        function logout() {
+            Auth.logout();
+            window.location.href = 'index.html';
+        }
+
+        // Initialize
+        loadStats();
+        loadArtisans();
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Artisan Dashboard - Manage your products on Threads of Tradition">
+    <title>Dashboard | Threads of Tradition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .profile-card {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+            color: white;
+            padding: var(--space-8);
+            border-radius: var(--radius-xl);
+            margin-bottom: var(--space-8);
+        }
+
+        .profile-card h2 {
+            color: white;
+            margin-bottom: var(--space-2);
+        }
+
+        .profile-info {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-6);
+            margin-top: var(--space-4);
+        }
+
+        .profile-info-item {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: var(--space-16);
+            background: var(--gray-50);
+            border-radius: var(--radius-lg);
+            border: 2px dashed var(--gray-300);
+        }
+
+        .empty-state h3 {
+            color: var(--gray-600);
+        }
+
+        .my-products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--space-6);
+        }
+
+        .product-actions {
+            display: flex;
+            gap: var(--space-2);
+            margin-top: var(--space-3);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="../index.html" class="navbar-brand">
+                <span>🧵</span>
+                <span>Threads of Tradition</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="../shop/index.html">Shop</a></li>
+                <li><a href="dashboard.html" class="active">Dashboard</a></li>
+                <li><a href="upload.html">Upload Product</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <button class="btn btn-ghost" onclick="logout()" style="color: white;">Logout</button>
+            </div>
+        </div>
+    </nav>
+
+    <main class="container" style="padding: var(--space-8) var(--space-4);">
+        <!-- Profile Card -->
+        <div class="profile-card animate-fadeIn" id="profile-card">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 id="artisan-name">Loading...</h2>
+                    <p id="artisan-location" style="opacity: 0.9;">📍 Loading...</p>
+                </div>
+                <div id="verification-badge"></div>
+            </div>
+            <div class="profile-info">
+                <div class="profile-info-item">
+                    <span>📧</span>
+                    <span id="artisan-email">Loading...</span>
+                </div>
+                <div class="profile-info-item">
+                    <span>📦</span>
+                    <span><strong id="product-count">0</strong> Products</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <section>
+            <div class="products-header">
+                <h2>My Products</h2>
+                <a href="upload.html" class="btn btn-primary">+ Upload New Product</a>
+            </div>
+
+            <div id="products-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-4">Loading products...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="../js/api.js"></script>
+    <script src="../js/auth.js"></script>
+    <script>
+        // Check authentication
+        if (!Auth.requireArtisan()) {
+            // Redirect happens in requireArtisan
+        }
+
+        const productsContainer = document.getElementById('products-container');
+
+        async function loadProfile() {
+            try {
+                const response = await API.Artisan.getProfile();
+                const artisan = response.artisan;
+
+                document.getElementById('artisan-name').textContent = artisan.name;
+                document.getElementById('artisan-location').textContent = `📍 ${artisan.location}`;
+                document.getElementById('artisan-email').textContent = artisan.email;
+                document.getElementById('product-count').textContent = artisan.product_count;
+
+                // Verification badge
+                const badgeContainer = document.getElementById('verification-badge');
+                if (artisan.is_verified) {
+                    badgeContainer.innerHTML = `
+                        <span class="badge badge-success" style="font-size: var(--font-size-base); padding: var(--space-2) var(--space-4);">
+                            ✓ Verified Artisan
+                        </span>
+                    `;
+                } else {
+                    badgeContainer.innerHTML = `
+                        <span class="badge badge-warning" style="font-size: var(--font-size-base); padding: var(--space-2) var(--space-4);">
+                            ⏳ Verification Pending
+                        </span>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading profile:', error);
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await API.Artisan.getMyProducts();
+                const products = response.products;
+
+                if (products.length === 0) {
+                    productsContainer.innerHTML = `
+                        <div class="empty-state">
+                            <h3>No Products Yet</h3>
+                            <p class="text-muted mb-6">Start showcasing your handmade creations to the world!</p>
+                            <a href="upload.html" class="btn btn-primary btn-lg">Upload Your First Product</a>
+                        </div>
+                    `;
+                    return;
+                }
+
+                productsContainer.innerHTML = `
+                    <div class="my-products-grid">
+                        ${products.map(product => `
+                            <div class="card product-card">
+                                <img src="${getImageUrl(product.image_path)}" alt="${product.material} product" class="card-image" 
+                                     onerror="this.src='https://via.placeholder.com/400x250/f5ebe0/a65434?text=Handmade+Product'">
+                                <div class="card-body">
+                                    <div class="flex justify-between items-center mb-4">
+                                        <span class="badge badge-info">${product.material}</span>
+                                        <span class="certificate-id">${product.certificate_id}</span>
+                                    </div>
+                                    <p class="card-text" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                                        ${product.caption}
+                                    </p>
+                                    <div class="price-tag">₹${product.price_min.toLocaleString()} - ₹${product.price_max.toLocaleString()}</div>
+                                    <p class="text-muted text-sm mt-2">⏱️ ${product.time_spent} hours of craftsmanship</p>
+                                    <div class="product-actions">
+                                        <button class="btn btn-sm btn-ghost" onclick="deleteProduct(${product.id})">🗑️ Delete</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } catch (error) {
+                productsContainer.innerHTML = `
+                    <div class="alert alert-error">
+                        Error loading products: ${error.message}
+                    </div>
+                `;
+            }
+        }
+
+        function getImageUrl(imagePath) {
+            if (!imagePath || imagePath === 'products/demo_placeholder.jpg') {
+                return 'https://via.placeholder.com/400x250/f5ebe0/a65434?text=Handmade+Product';
+            }
+            return `http://localhost:5000/uploads/${imagePath}`;
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                await API.Product.delete(productId);
+                loadProducts();
+                loadProfile();
+            } catch (error) {
+                alert('Error deleting product: ' + error.message);
+            }
+        }
+
+        function logout() {
+            Auth.logout();
+            window.location.href = 'login.html';
+        }
+
+        // Load data
+        loadProfile();
+        loadProducts();
+    </script>
+</body>
+
+</html>

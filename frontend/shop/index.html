@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Shop authentic handmade Indian products from verified artisans">
+    <title>Shop Handmade Products | Threads of Tradition</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Playfair+Display:wght@500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="../css/style.css">
+    <style>
+        .shop-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-8);
+            padding: var(--space-8) var(--space-4);
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 900px) {
+            .shop-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-sidebar {
+                display: none;
+            }
+        }
+
+        .shop-hero {
+            background: linear-gradient(135deg, var(--primary-600) 0%, var(--accent-maroon) 100%);
+            color: white;
+            padding: var(--space-12) var(--space-4);
+            text-align: center;
+        }
+
+        .shop-hero h1 {
+            color: white;
+            font-size: var(--font-size-4xl);
+        }
+
+        .shop-hero p {
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .filters-sidebar {
+            position: sticky;
+            top: 100px;
+            height: fit-content;
+        }
+
+        .filter-section {
+            margin-bottom: var(--space-6);
+        }
+
+        .filter-section h4 {
+            font-size: var(--font-size-base);
+            margin-bottom: var(--space-3);
+            color: var(--gray-700);
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            padding: var(--space-2) 0;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary-500);
+        }
+
+        .price-inputs {
+            display: flex;
+            gap: var(--space-2);
+            align-items: center;
+        }
+
+        .price-inputs input {
+            width: 100px;
+            padding: var(--space-2);
+            border: 1px solid var(--gray-300);
+            border-radius: var(--radius-sm);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-6);
+        }
+
+        .product-detail-modal {
+            display: none;
+        }
+
+        .product-modal-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-8);
+        }
+
+        @media (max-width: 600px) {
+            .product-modal-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .product-modal-image {
+            width: 100%;
+            border-radius: var(--radius-lg);
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="container navbar-content">
+            <a href="../index.html" class="navbar-brand">
+                <span>🧵</span>
+                <span>Threads of Tradition</span>
+            </a>
+            <ul class="navbar-nav">
+                <li><a href="index.html" class="active">Shop</a></li>
+                <li><a href="../artisan/index.html">Artisan Portal</a></li>
+            </ul>
+            <div class="navbar-actions">
+                <a href="../artisan/register.html" class="btn btn-gold">Become an Artisan</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero -->
+    <section class="shop-hero">
+        <h1>🛍️ Discover Authentic Handmade Treasures</h1>
+        <p>Each product is handcrafted by verified Indian artisans. Support tradition, empower artisans.</p>
+    </section>
+
+    <!-- Shop Content -->
+    <div class="shop-layout">
+        <!-- Filters Sidebar -->
+        <aside class="filters-sidebar">
+            <div class="filters">
+                <h3>Filters</h3>
+
+                <div class="filter-section">
+                    <h4>Material</h4>
+                    <div class="checkbox-group" id="material-filters">
+                        <!-- Dynamically loaded -->
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Price Range (₹)</h4>
+                    <div class="price-inputs">
+                        <input type="number" id="min-price" placeholder="Min" min="0">
+                        <span>-</span>
+                        <input type="number" id="max-price" placeholder="Max" min="0">
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h4>Artisan Status</h4>
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="verified-only">
+                            <span>Verified Artisans Only</span>
+                        </label>
+                    </div>
+                </div>
+
+                <button class="btn btn-primary btn-block" onclick="applyFilters()">Apply Filters</button>
+                <button class="btn btn-ghost btn-block mt-4" onclick="clearFilters()">Clear All</button>
+            </div>
+        </aside>
+
+        <!-- Products Grid -->
+        <main>
+            <div class="results-header">
+                <h2>All Products</h2>
+                <span class="text-muted" id="product-count">Loading...</span>
+            </div>
+
+            <div id="products-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-4">Loading products...</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Product Modal -->
+    <div class="modal-backdrop" id="product-modal" onclick="closeModal(event)">
+        <div class="modal" style="max-width: 800px;" onclick="event.stopPropagation()">
+            <div class="modal-header">
+                <h3 id="modal-title">Product Details</h3>
+                <button class="btn btn-ghost btn-icon" onclick="closeProductModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="product-modal-content">
+                    <div>
+                        <img id="modal-image" src="" alt="Product" class="product-modal-image">
+                    </div>
+                    <div>
+                        <div class="flex gap-2 mb-4">
+                            <span class="badge badge-info" id="modal-material">Material</span>
+                            <span id="modal-verified-badge"></span>
+                        </div>
+
+                        <p id="modal-caption" class="mb-6" style="line-height: 1.8;"></p>
+
+                        <div class="price-tag mb-4" id="modal-price">₹0 - ₹0</div>
+
+                        <div class="flex flex-col gap-2 text-sm text-muted">
+                            <div>👩‍🎨 <span id="modal-artisan">Artisan Name</span></div>
+                            <div>📍 <span id="modal-location">Location</span></div>
+                            <div>⏱️ <span id="modal-time">0 hours</span> of craftsmanship</div>
+                        </div>
+
+                        <div class="certificate-id mt-4" id="modal-certificate">TOT-XXXXXXXX</div>
+
+                        <div class="alert alert-info mt-6">
+                            <span>ℹ️</span>
+                            <span>This is a demo platform. No actual purchases available.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container footer-bottom">
+            <p>© 2024 Threads of Tradition. Empowering Indian Artisans. This is a demonstration prototype.</p>
+        </div>
+    </footer>
+
+    <script src="../js/api.js"></script>
+    <script>
+        let allProducts = [];
+        let selectedMaterials = [];
+
+        // Load materials for filter
+        async function loadMaterialFilters() {
+            try {
+                const response = await API.Product.getMaterials();
+                const container = document.getElementById('material-filters');
+                container.innerHTML = response.materials.map(material => `
+                    <label>
+                        <input type="checkbox" value="${material}" onchange="updateMaterialFilter(this)">
+                        <span>${material.charAt(0).toUpperCase() + material.slice(1)}</span>
+                    </label>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading materials:', error);
+            }
+        }
+
+        function updateMaterialFilter(checkbox) {
+            if (checkbox.checked) {
+                selectedMaterials.push(checkbox.value);
+            } else {
+                selectedMaterials = selectedMaterials.filter(m => m !== checkbox.value);
+            }
+        }
+
+        // Load products
+        async function loadProducts(filters = {}) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p class="mt-4">Loading products...</p>
+                </div>
+            `;
+
+            try {
+                const response = await API.Product.list(filters);
+                allProducts = response.products;
+
+                document.getElementById('product-count').textContent = `${response.total} products found`;
+
+                if (response.products.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state" style="text-align: center; padding: var(--space-16); background: var(--gray-50); border-radius: var(--radius-lg);">
+                            <h3>No Products Found</h3>
+                            <p class="text-muted">Try adjusting your filters or check back later.</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = `
+                    <div class="product-grid">
+                        ${response.products.map(product => createProductCard(product)).join('')}
+                    </div>
+                `;
+
+            } catch (error) {
+                container.innerHTML = `
+                    <div class="alert alert-error">
+                        Error loading products: ${error.message}. Make sure the backend server is running.
+                    </div>
+                `;
+            }
+        }
+
+        function createProductCard(product) {
+            const imageUrl = getImageUrl(product.image_path);
+            const verifiedBadge = product.artisan_verified
+                ? '<span class="verified-badge">✓ Verified</span>'
+                : '';
+
+            return `
+                <div class="card product-card animate-fadeIn" onclick="showProductDetail(${product.id})">
+                    ${verifiedBadge}
+                    <img src="${imageUrl}" alt="${product.material} handmade product" class="card-image"
+                         onerror="this.src='https://via.placeholder.com/400x250/f5ebe0/a65434?text=Handmade+${product.material}'">
+                    <div class="card-body">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="badge badge-info">${product.material}</span>
+                            <span class="certificate-id">${product.certificate_id}</span>
+                        </div>
+                        <p class="card-text" style="display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden;">
+                            ${product.caption}
+                        </p>
+                        <div class="price-tag">₹${product.price_min.toLocaleString()} - ₹${product.price_max.toLocaleString()}</div>
+                        <div class="artisan-info">
+                            <span>👩‍🎨</span>
+                            <span>${product.artisan_name} • ${product.artisan_location}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getImageUrl(imagePath) {
+            if (!imagePath || imagePath === 'products/demo_placeholder.jpg') {
+                return 'https://via.placeholder.com/400x250/f5ebe0/a65434?text=Handmade+Product';
+            }
+            return `http://localhost:5000/uploads/${imagePath}`;
+        }
+
+        function showProductDetail(productId) {
+            const product = allProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            document.getElementById('modal-image').src = getImageUrl(product.image_path);
+            document.getElementById('modal-image').onerror = function () {
+                this.src = `https://via.placeholder.com/400x300/f5ebe0/a65434?text=Handmade+${product.material}`;
+            };
+            document.getElementById('modal-material').textContent = product.material;
+            document.getElementById('modal-caption').textContent = product.caption;
+            document.getElementById('modal-price').textContent =
+                `₹${product.price_min.toLocaleString()} - ₹${product.price_max.toLocaleString()}`;
+            document.getElementById('modal-artisan').textContent = product.artisan_name;
+            document.getElementById('modal-location').textContent = product.artisan_location;
+            document.getElementById('modal-time').textContent = `${product.time_spent} hours`;
+            document.getElementById('modal-certificate').textContent = product.certificate_id;
+
+            document.getElementById('modal-verified-badge').innerHTML = product.artisan_verified
+                ? '<span class="badge badge-success">✓ Verified Artisan</span>'
+                : '<span class="badge badge-warning">Pending Verification</span>';
+
+            document.getElementById('product-modal').classList.add('active');
+        }
+
+        function closeProductModal() {
+            document.getElementById('product-modal').classList.remove('active');
+        }
+
+        function closeModal(event) {
+            if (event.target.classList.contains('modal-backdrop')) {
+                closeProductModal();
+            }
+        }
+
+        function applyFilters() {
+            const filters = {};
+
+            if (selectedMaterials.length === 1) {
+                filters.material = selectedMaterials[0];
+            }
+
+            const minPrice = document.getElementById('min-price').value;
+            const maxPrice = document.getElementById('max-price').value;
+
+            if (minPrice) filters.min_price = minPrice;
+            if (maxPrice) filters.max_price = maxPrice;
+            if (document.getElementById('verified-only').checked) {
+                filters.verified_only = true;
+            }
+
+            loadProducts(filters);
+        }
+
+        function clearFilters() {
+            selectedMaterials = [];
+            document.querySelectorAll('#material-filters input').forEach(cb => cb.checked = false);
+            document.getElementById('min-price').value = '';
+            document.getElementById('max-price').value = '';
+            document.getElementById('verified-only').checked = false;
+            loadProducts();
+        }
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeProductModal();
+            }
+        });
+
+        // Initialize
+        loadMaterialFilters();
+        loadProducts();
+    </script>
+</body>
+
+</html>
